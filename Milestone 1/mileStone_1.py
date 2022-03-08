@@ -44,24 +44,3 @@ for k in docs1.keys():
         if docs1[k]['Execution'] == 'Sequential':
             seq(k, docs1[k]['Activities'])
 
-# file1 = open("LogFile.txt", "w")
-# log = ['Entry', 'Exit']
-# for key in docs1:
-#     ct = str(datetime.datetime.now())
-#     s = ct + ';'
-#     s = s + key
-#     s = s + " " + log[0]
-#     file1.write(s+'\n')
-#     s = s - log[0]
-#     print(s)
-#     key1 = docs1[key]
-#     for k in key1['Activities']:
-#         s2 = s
-#         if docs1[key]['Activities'][k]['Type'] == 'Task':
-#             s1 = s2.split(';')
-#             ct = str(datetime.datetime.now())
-#             s1[0] = ct
-#             s2 = s1[0] + ';' + s1[1]
-#             file1.write(s+'\n')
-#             s = s + " Executing" + docs1[key]['Activities'][k]['Function'] + "(" + docs1[key]['Activities'][k]['Inputs']['ExecutionTime']+")"
-#             file1.write(s+'\n')
