@@ -3,7 +3,9 @@ import datetime
 import time
 from yaml.loader import SafeLoader
 
-file1 = open("LogFile2.txt", "w")
+file1 = open("LogFile1.txt", "w")
+
+
 
 
 def timeWait(flowName, taskName, secs, input):
@@ -36,17 +38,21 @@ def seq(flowName, activities):
             file1.write(string + '\n')
 
 
+with open('Milestone1A.yaml') as f:
+    docs1 = yaml.load(f, Loader=SafeLoader)
+f.close()
+
 with open('Milestone1B.yaml') as f:
     docs2 = yaml.load(f, Loader=SafeLoader)
 f.close()
 
-for k in docs2.keys():
+for k in docs1.keys():
     ct = str(datetime.datetime.now())
     s = ct + ';' + k + ' Entry'
     file1.write(s + '\n')
-    if docs2[k]['Type'] == "Flow":
-        if docs2[k]['Execution'] == 'Sequential':
-            seq(k, docs2[k]['Activities'])
+    if docs1[k]['Type'] == "Flow":
+        if docs1[k]['Execution'] == 'Sequential':
+            seq(k, docs1[k]['Activities'])
     ct = str(datetime.datetime.now())
     s = ct + ';' + k + ' Exit'
     file1.write(s + '\n')
