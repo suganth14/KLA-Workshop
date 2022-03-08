@@ -3,8 +3,10 @@ import datetime
 import time
 from yaml.loader import SafeLoader
 import threading
+import csv
 
-file1 = open("LogFile2.txt", "w")
+file1 = open("LogFile1.txt", "w")
+no_of_defects = -1
 
 
 def timeWait(flowName, taskName, secs, input):
@@ -14,13 +16,12 @@ def timeWait(flowName, taskName, secs, input):
     time.sleep(int(secs))
 
 
-def seq1(flowName, activity, name):   #Particular task or flow handler
+def seq1(flowName, activity, name):
     if activity['Type'] == 'Task':
         ct1 = str(datetime.datetime.now())
         string = ct1 + ';' + flowName + '.' + name + ' Entry'
         file1.write(string + '\n')
-        timeWait(flowName, name, activity['Inputs']['ExecutionTime'],
-                 activity['Inputs']['FunctionInput'])
+        timeWait(flowName, name, activity['Inputs']['ExecutionTime'], activity['Inputs']['FunctionInput'])
         ct2 = str(datetime.datetime.now())
         string1 = ct2 + ';' + flowName + '.' + name + ' Exit'
         file1.write(string1 + '\n')
@@ -35,7 +36,8 @@ def seq1(flowName, activity, name):   #Particular task or flow handler
         file1.write(string + '\n')
 
 
-def seq(flowName, activities):    #set of activities handler
+def seq(flowName, activities):
+    global no_of_defects
     for i in activities.keys():
         if activities[i]['Type'] == 'Task':
             if activities[i]['Function'] == "TimeFunction":
@@ -47,6 +49,33 @@ def seq(flowName, activities):    #set of activities handler
                 ct2 = str(datetime.datetime.now())
                 string1 = ct2 + ';' + flowName + '.' + i + ' Exit'
                 file1.write(string1 + '\n')
+
+            elif activities[i]['Function'] == "DataLoad":
+                boole = True
+                if 'Condition' in activities[i]:
+                    val = int(activities[i]['Condition'][-1])
+                    sign = activities[i]['Condition'][-3]
+                    if sign == '>':
+                        if no_of_defects < val:
+                            boole = False
+                    if sign == '<':
+                        if no_of_defects > val:
+                            boole = False
+                if True:
+                    if no_of_defects == -1 or boole:
+                        ct1 = str(datetime.datetime.now())
+                        string = ct1 + ';' + flowName + '.' + i + ' Entry'
+                        file1.write(string + '\n')
+                        filename = activities[i]['Inputs']['Filename']
+                        string = ct1 + ';' + flowName + '.' + i + ' Executing DataLoad(' + filename + ')'
+                        file1.write(string + '\n')
+                        with open(filename, 'r', newline='') as file:
+                            data = csv.reader(file)
+                            for row in data:
+                                no_of_defects += 1
+                        file.close()
+                        ct1 = str(datetime.datetime.now())
+                        string = ct1 + ';' + flowName + '.' + i + ' Entry'
 
         if activities[i]['Type'] == 'Flow':
             ct1 = str(datetime.datetime.now())
@@ -68,7 +97,7 @@ def seq(flowName, activities):    #set of activities handler
             file1.write(string + '\n')
 
 
-with open('Milestone1B.yaml') as f:
+with open('Milestone2A.yaml') as f:
     docs1 = yaml.load(f, Loader=SafeLoader)
 f.close()
 
