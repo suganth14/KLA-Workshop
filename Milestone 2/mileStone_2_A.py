@@ -17,20 +17,69 @@ def timeWait(flowName, taskName, secs, input):
 
 
 def seq1(flowName, activity, name):
+    global no_of_defects
     if activity['Type'] == 'Task':
-        ct1 = str(datetime.datetime.now())
-        string = ct1 + ';' + flowName + '.' + name + ' Entry'
-        file1.write(string + '\n')
-        timeWait(flowName, name, activity['Inputs']['ExecutionTime'], activity['Inputs']['FunctionInput'])
-        ct2 = str(datetime.datetime.now())
-        string1 = ct2 + ';' + flowName + '.' + name + ' Exit'
-        file1.write(string1 + '\n')
+        if activity['Function'] == 'TimeFunction':
+            boole = True
+            if 'Condition' in activity:
+                val = int(activity['Condition'][-1])
+                sign = activity['Condition'][-3]
+                if sign == '>':
+                    if no_of_defects < val:
+                        boole = False
+                if sign == '<':
+                    if no_of_defects > val:
+                        boole = False
+            if boole:
+                ct1 = str(datetime.datetime.now())
+                string = ct1 + ';' + flowName + '.' + name + ' Entry'
+                file1.write(string + '\n')
+                timeWait(flowName, name, activity['Inputs']['ExecutionTime'], activity['Inputs']['FunctionInput'])
+                ct2 = str(datetime.datetime.now())
+                string1 = ct2 + ';' + flowName + '.' + name + ' Exit'
+                file1.write(string1 + '\n')
+        else:
+            boole = True
+            if 'Condition' in activity:
+                val = int(activity['Condition'][-1])
+                sign = activity['Condition'][-3]
+                if sign == '>':
+                    if no_of_defects < val:
+                        boole = False
+                if sign == '<':
+                    if no_of_defects > val:
+                        boole = False
+            if True:
+                if boole:
+                    ct1 = str(datetime.datetime.now())
+                    string = ct1 + ';' + flowName + '.' + name + ' Entry'
+                    file1.write(string + '\n')
+                    filename = activity['Inputs']['Filename']
+                    string = ct1 + ';' + flowName + '.' + name + ' Executing DataLoad(' + filename + ')'
+                    file1.write(string + '\n')
+                    with open(filename, 'r', newline='') as file:
+                        data = csv.reader(file)
+                        for row in data:
+                            no_of_defects += 1
+                    file.close()
+                    ct1 = str(datetime.datetime.now())
+                    string = ct1 + ';' + flowName + '.' + name + ' Exit'
+                    file1.write(string + '\n')
+
     else:
         ct1 = str(datetime.datetime.now())
         string = ct1 + ';' + flowName + '.' + name + ' Entry'
         file1.write(string + '\n')
         if activity['Execution'] == 'Sequential':
             seq(flowName + '.' + name, activity['Activities'])
+        if activity['Execution'] == 'Concurrent':
+            Threads = []
+            for j in activity['Activities'].keys():
+                t = threading.Thread(target=seq1, args=[flowName + '.' + name, activity['Activities'][j], j])
+                Threads.append(t)
+                t.start()
+            for j in range(len(Threads)):
+                Threads[j].join()
         ct1 = str(datetime.datetime.now())
         string = ct1 + ';' + flowName + '.' + name + ' Exit'
         file1.write(string + '\n')
@@ -62,7 +111,7 @@ def seq(flowName, activities):
                         if no_of_defects > val:
                             boole = False
                 if True:
-                    if no_of_defects == -1 or boole:
+                    if boole:
                         ct1 = str(datetime.datetime.now())
                         string = ct1 + ';' + flowName + '.' + i + ' Entry'
                         file1.write(string + '\n')
@@ -75,7 +124,8 @@ def seq(flowName, activities):
                                 no_of_defects += 1
                         file.close()
                         ct1 = str(datetime.datetime.now())
-                        string = ct1 + ';' + flowName + '.' + i + ' Entry'
+                        string = ct1 + ';' + flowName + '.' + i + ' Exit'
+                        file1.write(string + '\n')
 
         if activities[i]['Type'] == 'Flow':
             ct1 = str(datetime.datetime.now())
