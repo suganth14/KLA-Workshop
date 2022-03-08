@@ -5,8 +5,8 @@ from yaml.loader import SafeLoader
 import threading
 import csv
 
-file1 = open("LogFile1.txt", "w")
-no_of_defects = -1
+file1 = open("MileStone2_LogFile2_B.txt", "w")
+no_of_defects = {}
 
 
 def timeWait(flowName, taskName, secs, input):
@@ -22,13 +22,17 @@ def seq1(flowName, activity, name):
         if activity['Function'] == 'TimeFunction':
             boole = True
             if 'Condition' in activity:
+                condition = activity['Condition'][15:20]
                 val = int(activity['Condition'][-1])
                 sign = activity['Condition'][-3]
+                print(condition)
+                while condition not in no_of_defects:
+                    pass
                 if sign == '>':
-                    if no_of_defects < val:
+                    if no_of_defects[condition] < val:
                         boole = False
                 if sign == '<':
-                    if no_of_defects > val:
+                    if no_of_defects[condition] > val:
                         boole = False
             if boole:
                 ct1 = str(datetime.datetime.now())
@@ -52,13 +56,14 @@ def seq1(flowName, activity, name):
         else:
             boole = True
             if 'Condition' in activity:
+                condition = activity['Condition'][15:20]
                 val = int(activity['Condition'][-1])
                 sign = activity['Condition'][-3]
                 if sign == '>':
-                    if no_of_defects < val:
+                    if no_of_defects[condition] < val:
                         boole = False
                 if sign == '<':
-                    if no_of_defects > val:
+                    if no_of_defects[condition] > val:
                         boole = False
             if True:
                 if boole:
@@ -73,8 +78,7 @@ def seq1(flowName, activity, name):
                         no_of_d = -1
                         for row in data:
                             no_of_d += 1
-                        no_of_defects = no_of_d
-                        print(no_of_defects)
+                        no_of_defects[name] = no_of_d
                     file.close()
                     ct1 = str(datetime.datetime.now())
                     string = ct1 + ';' + flowName + '.' + name + ' Exit'
@@ -104,25 +108,47 @@ def seq(flowName, activities):
     for i in activities.keys():
         if activities[i]['Type'] == 'Task':
             if activities[i]['Function'] == "TimeFunction":
-                ct1 = str(datetime.datetime.now())
-                string = ct1 + ';' + flowName + '.' + i + ' Entry'
-                file1.write(str(string + '\n'))
-                timeWait(flowName, i, activities[i]['Inputs']['ExecutionTime'],
-                         activities[i]['Inputs']['FunctionInput'])
-                ct2 = str(datetime.datetime.now())
-                string1 = ct2 + ';' + flowName + '.' + i + ' Exit'
-                file1.write(str(string1 + '\n'))
+                boole = True
+                if 'Condition' in activities[i]:
+                    condition = activities[i]['Condition'][15:20]
+                    val = int(activities[i]['Condition'][-1])
+                    sign = activities[i]['Condition'][-3]
+                    if sign == '>':
+                        if no_of_defects[condition] < val:
+                            boole = False
+                    if sign == '<':
+                        if no_of_defects[condition] > val:
+                            boole = False
+                if boole:
+                    ct1 = str(datetime.datetime.now())
+                    string = ct1 + ';' + flowName + '.' + i + ' Entry'
+                    file1.write(str(string + '\n'))
+                    timeWait(flowName, i, activities[i]['Inputs']['ExecutionTime'], activities[i]['Inputs']['FunctionInput'])
+                    ct2 = str(datetime.datetime.now())
+                    string1 = ct2 + ';' + flowName + '.' + i + ' Exit'
+                    file1.write(str(string1 + '\n'))
+                else:
+                    ct1 = str(datetime.datetime.now())
+                    string = ct1 + ';' + flowName + '.' + i + ' Entry'
+                    file1.write(str(string + '\n'))
+                    ct1 = str(datetime.datetime.now())
+                    string = ct1 + ';' + flowName + '.' + i + ' Skipped'
+                    file1.write(str(string + '\n'))
+                    ct2 = str(datetime.datetime.now())
+                    string1 = ct2 + ';' + flowName + '.' + i + ' Exit'
+                    file1.write(str(string1 + '\n'))
 
             elif activities[i]['Function'] == "DataLoad":
                 boole = True
                 if 'Condition' in activities[i]:
+                    condition = activities[i]['Condition'][15:20]
                     val = int(activities[i]['Condition'][-1])
                     sign = activities[i]['Condition'][-3]
                     if sign == '>':
-                        if no_of_defects < val:
+                        if no_of_defects[condition] < val:
                             boole = False
                     if sign == '<':
-                        if no_of_defects > val:
+                        if no_of_defects[condition] > val:
                             boole = False
                 if True:
                     if boole:
@@ -134,8 +160,10 @@ def seq(flowName, activities):
                         file1.write(str(string + '\n'))
                         with open(filename, 'r', newline='') as file:
                             data = csv.reader(file)
+                            d = -1
                             for row in data:
-                                no_of_defects += 1
+                                d += 1
+                        no_of_defects[i] = d
                         file.close()
                         ct1 = str(datetime.datetime.now())
                         string = ct1 + ';' + flowName + '.' + i + ' Exit'
@@ -161,7 +189,7 @@ def seq(flowName, activities):
             file1.write(str(string + '\n'))
 
 
-with open('Milestone2A.yaml') as f:
+with open('Milestone2B.yaml') as f:
     docs1 = yaml.load(f, Loader=SafeLoader)
 f.close()
 
