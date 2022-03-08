@@ -4,6 +4,7 @@ import time
 from yaml.loader import SafeLoader
 import threading
 import csv
+from collections import OrderedDict
 
 file1 = open("MileStone2_LogFile2_B.txt", "w")
 no_of_defects = {}
@@ -25,7 +26,6 @@ def seq1(flowName, activity, name):
                 condition = activity['Condition'][15:20]
                 val = int(activity['Condition'][-1])
                 sign = activity['Condition'][-3]
-                print(condition)
                 while condition not in no_of_defects:
                     pass
                 if sign == '>':
@@ -190,7 +190,7 @@ def seq(flowName, activities):
 
 
 with open('Milestone2B.yaml') as f:
-    docs1 = yaml.load(f, Loader=SafeLoader)
+    docs1 = OrderedDict(yaml.load(f, Loader=SafeLoader))
 f.close()
 
 for k in docs1.keys():
