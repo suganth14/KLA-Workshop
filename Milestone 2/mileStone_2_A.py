@@ -5,7 +5,7 @@ from yaml.loader import SafeLoader
 import threading
 import csv
 
-file1 = open("LogFile1.txt", "w")
+file1 = open("MileStone2_LogFile2_A.txt", "w")
 no_of_defects = -1
 
 

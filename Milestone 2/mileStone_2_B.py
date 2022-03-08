@@ -5,13 +5,13 @@ from yaml.loader import SafeLoader
 import threading
 import csv
 
-file1 = open("LogFile2.txt", "w")
-no_of_defects = {}
+file1 = open("LogFile1.txt", "w")
+no_of_defects = -1
 
 
 def timeWait(flowName, taskName, secs, input):
     ct1 = str(datetime.datetime.now())
-    string = ct1 + ';' + flowName + '.' + taskName + ' Executing TimeFunction (' + input + ',' + secs + ')'
+    string = ct1 + ';' + flowName + '.' + taskName + ' Executing TimeFunction(' + input + ',' + secs + ')'
     file1.write(str(string + '\n'))
     time.sleep(int(secs))
 
@@ -24,12 +24,11 @@ def seq1(flowName, activity, name):
             if 'Condition' in activity:
                 val = int(activity['Condition'][-1])
                 sign = activity['Condition'][-3]
-                condition = activity['Condition']
                 if sign == '>':
-                    if val > no_of_defects[condition]:
+                    if no_of_defects < val:
                         boole = False
                 if sign == '<':
-                    if val > no_of_defects[condition]:
+                    if no_of_defects > val:
                         boole = False
             if boole:
                 ct1 = str(datetime.datetime.now())
@@ -39,17 +38,27 @@ def seq1(flowName, activity, name):
                 ct2 = str(datetime.datetime.now())
                 string1 = ct2 + ';' + flowName + '.' + name + ' Exit'
                 file1.write(str(string1 + '\n'))
+            else:
+                ct1 = str(datetime.datetime.now())
+                string = ct1 + ';' + flowName + '.' + name + ' Entry'
+                file1.write(str(string + '\n'))
+                ct1 = str(datetime.datetime.now())
+                string = ct1 + ';' + flowName + '.' + name + ' Skipped'
+                file1.write(str(string + '\n'))
+                ct2 = str(datetime.datetime.now())
+                string1 = ct2 + ';' + flowName + '.' + name + ' Exit'
+                file1.write(str(string1 + '\n'))
+
         else:
             boole = True
             if 'Condition' in activity:
                 val = int(activity['Condition'][-1])
                 sign = activity['Condition'][-3]
-                condition = activity['Condition']
                 if sign == '>':
-                    if val > no_of_defects[condition]:
+                    if no_of_defects < val:
                         boole = False
                 if sign == '<':
-                    if val > no_of_defects[condition]:
+                    if no_of_defects > val:
                         boole = False
             if True:
                 if boole:
@@ -57,7 +66,7 @@ def seq1(flowName, activity, name):
                     string = ct1 + ';' + flowName + '.' + name + ' Entry'
                     file1.write(str(string + '\n'))
                     filename = activity['Inputs']['Filename']
-                    string = ct1 + ';' + flowName + '.' + name + ' Executing DataLoad (' + filename + ')'
+                    string = ct1 + ';' + flowName + '.' + name + ' Executing DataLoad(' + filename + ')'
                     file1.write(str(string + '\n'))
                     with open(filename, 'r', newline='') as file:
                         data = csv.reader(file)
@@ -121,7 +130,7 @@ def seq(flowName, activities):
                         string = ct1 + ';' + flowName + '.' + i + ' Entry'
                         file1.write(str(string + '\n'))
                         filename = activities[i]['Inputs']['Filename']
-                        string = ct1 + ';' + flowName + '.' + i + ' Executing DataLoad (' + filename + ')'
+                        string = ct1 + ';' + flowName + '.' + i + ' Executing DataLoad(' + filename + ')'
                         file1.write(str(string + '\n'))
                         with open(filename, 'r', newline='') as file:
                             data = csv.reader(file)
@@ -152,7 +161,7 @@ def seq(flowName, activities):
             file1.write(str(string + '\n'))
 
 
-with open('Milestone2B.yaml') as f:
+with open('Milestone2A.yaml') as f:
     docs1 = yaml.load(f, Loader=SafeLoader)
 f.close()
 
