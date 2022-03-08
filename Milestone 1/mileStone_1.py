@@ -26,7 +26,13 @@ def seq(flowName, activities):
                 file1.write(string1 + '\n')
 
         if activities[i]['Type'] == 'Flow':
+            ct1 = str(datetime.datetime.now())
+            string = ct1 + ';' + flowName + '.' + i + ' Entry'
+            file1.write(string + '\n')
             seq(flowName + '.' + i, activities[i]['Activities'])
+            ct1 = str(datetime.datetime.now())
+            string = ct1 + ';' + flowName + '.' + i + ' Exit'
+            file1.write(string + '\n')
 
 with open('Milestone1A.yaml') as f:
     docs1 = yaml.load(f, Loader=SafeLoader)
@@ -43,4 +49,8 @@ for k in docs1.keys():
     if docs1[k]['Type'] == "Flow":
         if docs1[k]['Execution'] == 'Sequential':
             seq(k, docs1[k]['Activities'])
+    ct = str(datetime.datetime.now())
+    s = ct + ';' + k + ' Exit'
+    file1.write(s + '\n')
 
+#for k in docs2.keys()
